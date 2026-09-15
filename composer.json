@@ -1,6 +1,7 @@
 {
     "name": "esiegman/cop4331-lamp-contact-app",
     "description": "Contacts Manager LAMP API",
+    "license": "proprietary",
     "require": {
         "php": ">=8.1"
     },
