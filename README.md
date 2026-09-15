@@ -21,10 +21,10 @@ composer install
 docker compose up --build
 ```
 
-| Service | URL | Notes |
-|---|---|---|
-| `web` | http://localhost:8080 | PHP API |
-| `db` | localhost:3306 | `ContactsAppDB` (dev), `ContactsAppDB_test` (test) |
+| Service      | URL                   | Notes                                                          |
+| ------------ | --------------------- | -------------------------------------------------------------- |
+| `web`        | http://localhost:8080 | PHP API                                                        |
+| `db`         | localhost:3306        | `ContactsAppDB` (dev), `ContactsAppDB_test` (test)             |
 | `phpmyadmin` | http://localhost:8081 | server `db`, user `ContactsAppUser`, password = your `DB_PASS` |
 
 ```bash
@@ -80,7 +80,6 @@ git push -u origin yourname/short-description
 Open a PR into `main`. Required to merge:
 
 - `php-tests` CI check passing
-- 1 teammate approval
 
 Squash and merge, then delete the branch.
 
