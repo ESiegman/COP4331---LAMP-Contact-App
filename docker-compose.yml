@@ -5,7 +5,7 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./api:/var/www/html
+      - .:/var/www/project
     environment:
       DB_HOST: db
       DB_NAME: ContactsAppDB
