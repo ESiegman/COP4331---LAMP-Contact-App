@@ -24,11 +24,11 @@ jobs:
 
       - name: Stage app bundle (composer files, api/src, vendor)
         run: |
-          mkdir -p /tmp/app-bundle
-          cp composer.json composer.lock /tmp/app-bundle/
-          cp -r api /tmp/app-bundle/api
-          rm -rf /tmp/app-bundle/api/public
-          cp -r vendor /tmp/app-bundle/vendor
+          mkdir -p app-bundle
+          cp composer.json composer.lock app-bundle/
+          cp -r api app-bundle/api
+          rm -rf app-bundle/api/public
+          cp -r vendor app-bundle/vendor
 
       - name: Deploy api/public to the web root (rsync)
         uses: burnett01/rsync-deployments@7.0.1
@@ -44,7 +44,7 @@ jobs:
         uses: burnett01/rsync-deployments@7.0.1
         with:
           switches: -avzr --delete
-          path: /tmp/app-bundle/
+          path: ./app-bundle/
           remote_path: /var/www/contacts-app/
           remote_host: ${{ secrets.DEPLOY_HOST }}
           remote_user: ${{ secrets.DEPLOY_USER }}
