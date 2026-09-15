@@ -1,0 +1,3 @@
+CREATE DATABASE IF NOT EXISTS ContactsAppDB_test;
+GRANT ALL PRIVILEGES ON ContactsAppDB_test.* TO 'ContactsAppUser'@'%';
+FLUSH PRIVILEGES;

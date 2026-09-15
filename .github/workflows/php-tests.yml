@@ -1,0 +1,54 @@
+name: PHP Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  php-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: ContactsAppDB_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_mysql, mysqli
+          coverage: none
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Load schema (and seed data) into the test DB
+        run: |
+          mysql -h 127.0.0.1 -u root -proot ContactsAppDB_test < db/schema.sql
+          mysql -h 127.0.0.1 -u root -proot ContactsAppDB_test < db/seed_test.sql
+
+      - name: Run PHPUnit
+        env:
+          DB_HOST: 127.0.0.1
+          DB_NAME: ContactsAppDB_test
+          DB_USER: root
+          DB_PASS: root
+        run: composer test
