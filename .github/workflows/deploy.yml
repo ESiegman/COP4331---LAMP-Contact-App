@@ -12,14 +12,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # NOTE: this only deploys api/public/ (static entry points) to the
-      # droplet's DocumentRoot. Once real endpoints exist under api/public
-      # that need App\ classes from api/src/ or Composer packages from
-      # vendor/, this workflow needs an additional step to get src/ and a
-      # production vendor/ onto the server (outside the web root) and an
-      # autoload path the deployed index.php can find in both Docker and
-      # production. Not wired up yet since no app code exists yet.
-      - name: Deploy over SSH (rsync)
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_mysql, mysqli
+          coverage: none
+
+      - name: Install production dependencies (no dev packages)
+        run: composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
+
+      - name: Stage app bundle (composer files, api/src, vendor)
+        run: |
+          mkdir -p /tmp/app-bundle
+          cp composer.json composer.lock /tmp/app-bundle/
+          cp -r api /tmp/app-bundle/api
+          rm -rf /tmp/app-bundle/api/public
+          cp -r vendor /tmp/app-bundle/vendor
+
+      - name: Deploy api/public to the web root (rsync)
         uses: burnett01/rsync-deployments@7.0.1
         with:
           switches: -avzr --delete
@@ -29,7 +40,18 @@ jobs:
           remote_user: ${{ secrets.DEPLOY_USER }}
           remote_key: ${{ secrets.DEPLOY_SSH_KEY }}
 
+      - name: Deploy app bundle (api/src + vendor) outside the web root (rsync)
+        uses: burnett01/rsync-deployments@7.0.1
+        with:
+          switches: -avzr --delete
+          path: /tmp/app-bundle/
+          remote_path: /var/www/contacts-app/
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_SSH_KEY }}
+
       - name: Reload Apache (optional)
+        continue-on-error: true
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEPLOY_HOST }}
