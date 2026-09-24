@@ -1,0 +1,228 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #090d16 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #f8fafc;
+        }
+
+        /* Ambient Glow Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        /* Card Styling */
+        .register-card {
+            background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+            border: 1.5px solid #6366f1;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Header Section */
+        .register-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .register-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #818cf8 0%, #c7d2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .register-header p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        /* Form Group Styling */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #e2e8f0;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #090d16;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            color: #f8fafc;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: #0f172a;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #64748b;
+        }
+
+        /* Password Requirements */
+        .password-requirements {
+            background: #082f49;
+            border: 1px solid #0284c7;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #7dd3fc;
+        }
+
+        .password-requirements ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .password-requirements li {
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-requirements li::before {
+            content: '○';
+            margin-right: 8px;
+            color: #38bdf8;
+        }
+
+        /* Register Button */
+        .btn-register {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 28px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-register:hover {
+            background: linear-gradient(90deg, #818cf8 0%, #a5b4fc 100%);
+            box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-register:active {
+            transform: translateY(0);
+        }
+
+        /* Footer / Login Link */
+        .register-footer {
+            text-align: center;
+            margin-top: 24px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .register-footer a {
+            color: #818cf8;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .register-footer a:hover {
+            color: #c7d2fe;
+            text-decoration: underline;
+        }
+
+        /* Error Messages */
+        .error-message {
+            color: #fca5a5;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .form-group.error input {
+            border-color: #dc2626;
+            background: rgba(220, 38, 38, 0.05);
+        }
+
+        /* Success Message */
+        .success-message {
+            background: #065f46;
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #a7f3d0;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 13px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* Loading State */
+        .btn-register.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .btn-register.loading::after {
+            content: ' ⏳';
+        }
