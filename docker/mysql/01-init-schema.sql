@@ -69,3 +69,12 @@ CREATE TABLE `Users` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2026-09-15 16:07:22
+
+-- ------------------------------------------------------
+-- Required default admin account (project requirement).
+-- Login: root  /  Password: ChangeMe123!
+-- Change this password immediately after first login.
+-- Hash generated with PHP: password_hash('ChangeMe123!', PASSWORD_DEFAULT)
+-- ------------------------------------------------------
+INSERT INTO Users (First_Name, Last_Name, Login, Password, Role, Active) VALUES
+  ('Application', 'Administrator', 'root', '$2b$10$NsXc1qxxmUasmvi9NVuuXuCaCdouU664bRMI3i2Jv5drz2hDcgRve', 'Admin', 1);
