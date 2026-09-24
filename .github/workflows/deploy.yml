@@ -30,12 +30,31 @@ jobs:
           rm -rf app-bundle/api/public
           cp -r vendor app-bundle/vendor
 
-      - name: Deploy api/public to the web root (rsync)
+      - name: Stage frontend bundle (public static files only)
+        run: |
+          mkdir -p frontend-bundle
+          cp index.html registration.html contacts.html admin.html frontend-bundle/
+          cp favicon.ico frontend-bundle/
+          cp -r css frontend-bundle/css
+          cp -r js frontend-bundle/js
+          cp -r images frontend-bundle/images
+
+      - name: Deploy frontend to the web root (rsync)
+        uses: burnett01/rsync-deployments@7.0.1
+        with:
+          switches: -avzr --delete
+          path: ./frontend-bundle/
+          remote_path: ${{ secrets.DEPLOY_PATH }}
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Deploy api/public under /api on the web root (rsync)
         uses: burnett01/rsync-deployments@7.0.1
         with:
           switches: -avzr --delete
           path: ./api/public/
-          remote_path: ${{ secrets.DEPLOY_PATH }}
+          remote_path: ${{ secrets.DEPLOY_PATH }}/api
           remote_host: ${{ secrets.DEPLOY_HOST }}
           remote_user: ${{ secrets.DEPLOY_USER }}
           remote_key: ${{ secrets.DEPLOY_SSH_KEY }}
