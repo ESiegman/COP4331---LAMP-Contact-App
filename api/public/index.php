@@ -86,6 +86,7 @@ $router->add('PUT', 'contacts.update', $requireAuth(fn ($auth, $r) => $contactsC
 $router->add('DELETE', 'contacts.delete', $requireAuth(fn ($auth, $r) => $contactsController->delete($auth, $r)));
 
 $router->add('GET', 'admin.users.search', $requireAuth(fn ($auth, $r) => $adminController->listUsers($auth, $r)));
+$router->add('POST', 'admin.users.create', $requireAuth(fn ($auth, $r) => $adminController->createUser($auth, $r)));
 $router->add('GET', 'admin.users.contacts', $requireAuth(fn ($auth, $r) => $adminController->userContacts($auth, $r)));
 $router->add('PUT', 'admin.users.disable', $requireAuth(fn ($auth, $r) => $adminController->disableUser($auth, $r)));
 $router->add('PUT', 'admin.users.password', $requireAuth(fn ($auth, $r) => $adminController->changeUserPassword($auth, $r)));

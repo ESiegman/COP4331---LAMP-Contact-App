@@ -10,16 +10,22 @@ final class UserModel
     {
     }
 
-    public function create(string $firstName, string $lastName, string $login, string $plainPassword): int
-    {
+    public function create(
+        string $firstName,
+        string $lastName,
+        string $login,
+        string $plainPassword,
+        string $role = 'User'
+    ): int {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO Users (First_Name, Last_Name, Login, Password) VALUES (:first, :last, :login, :password)'
+            'INSERT INTO Users (First_Name, Last_Name, Login, Password, Role) VALUES (:first, :last, :login, :password, :role)'
         );
         $stmt->execute([
             'first' => $firstName,
             'last' => $lastName,
             'login' => $login,
             'password' => password_hash($plainPassword, PASSWORD_DEFAULT),
+            'role' => $role === 'Admin' ? 'Admin' : 'User',
         ]);
 
         return (int) $this->pdo->lastInsertId();

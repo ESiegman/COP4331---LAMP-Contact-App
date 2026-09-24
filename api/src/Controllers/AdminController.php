@@ -40,6 +40,35 @@ final class AdminController
         return Response::success($this->contacts->search((int) $userId, $request->input('query')));
     }
 
+    public function createUser(AuthContext $auth, Request $request): array
+    {
+        if (!$auth->isAdmin()) {
+            return Response::error('Forbidden', 403);
+        }
+
+        $firstName = $request->input('First_Name');
+        $lastName = $request->input('Last_Name');
+        $login = $request->input('Login');
+        $password = $request->input('Password');
+        $role = $request->input('Role', 'User');
+
+        if (!$firstName || !$lastName || !$login || !$password) {
+            return Response::error('First_Name, Last_Name, Login, and Password are required', 400);
+        }
+
+        if (!in_array($role, ['User', 'Admin'], true)) {
+            return Response::error('Role must be User or Admin', 400);
+        }
+
+        if ($this->users->findByLogin($login) !== null) {
+            return Response::error('Login already exists', 409);
+        }
+
+        $id = $this->users->create($firstName, $lastName, $login, $password, $role);
+
+        return Response::success(['id' => $id, 'login' => $login, 'role' => $role], 201);
+    }
+
     public function disableUser(AuthContext $auth, Request $request): array
     {
         if (!$auth->isAdmin()) {
