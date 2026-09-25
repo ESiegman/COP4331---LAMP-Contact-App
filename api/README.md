@@ -116,6 +116,9 @@ All require an active session (`401` otherwise). Scoped to the caller's own cont
 | Param | Required |
 |---|---|
 | `query` | no, omit to list all of the caller's contacts |
+| `sortBy` | no, one of `First_Name`, `Last_Name`, `Email`, `Phone_Number`, `Date_Created`, `Is_Favorite`. Invalid/omitted falls back to `Last_Name, First_Name` |
+| `sortDir` | no, `ASC` or `DESC`, defaults to `ASC` |
+| `favoritesOnly` | no, `1` to only return contacts with `Is_Favorite = 1` |
 
 Matches `First_Name`, `Last_Name`, `Email`, `Phone_Number`. Real DB query per call, don't preload the full list client-side.
 
@@ -150,9 +153,9 @@ Responses:
 | Field | Required |
 |---|---|
 | `id` | yes |
-| `First_Name`, `Last_Name`, `Email`, `Phone_Number` | any subset, partial updates allowed |
+| `First_Name`, `Last_Name`, `Email`, `Phone_Number`, `Is_Favorite` | any subset, partial updates allowed |
 
-`ID`, `User_ID`, timestamps not editable through this endpoint.
+`ID`, `User_ID`, timestamps not editable through this endpoint. `Is_Favorite` is a boolean (`true`/`false`).
 
 Responses:
 - `200` success, `{id}`
@@ -182,6 +185,21 @@ Matches `Login`, `First_Name`, `Last_Name`. No password hash in the response.
 
 Responses:
 - `200` success, `data` is an array of user rows
+
+### POST `admin.users.create`
+
+| Field | Required |
+|---|---|
+| `First_Name` | yes |
+| `Last_Name` | yes |
+| `Login` | yes |
+| `Password` | yes |
+| `Role` | no, `User` or `Admin`, defaults to `User` |
+
+Responses:
+- `201` success, `{id, login, role}`
+- `400` missing fields or invalid `Role`
+- `409` login already taken
 
 ### GET `admin.users.contacts`
 

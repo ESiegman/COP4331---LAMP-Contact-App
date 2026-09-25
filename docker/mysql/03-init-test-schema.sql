@@ -30,6 +30,7 @@ CREATE TABLE `Contacts` (
   `Last_Name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `Email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `Phone_Number` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Is_Favorite` tinyint(1) NOT NULL DEFAULT '0',
   `Date_Created` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `Date_Updated` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `User_ID` int NOT NULL,

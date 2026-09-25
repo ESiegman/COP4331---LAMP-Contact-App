@@ -29,6 +29,26 @@ final class UserModelTest extends DatabaseTestCase
         $this->assertTrue(password_verify('plaintext123', $row['Password']));
     }
 
+    public function testCreateAcceptsExplicitAdminRole(): void
+    {
+        $login = 'test_create_admin_' . uniqid();
+        $id = $this->users->create('New', 'Admin', $login, 'plaintext123', 'Admin');
+
+        $row = $this->users->findById($id);
+
+        $this->assertSame('Admin', $row['Role']);
+    }
+
+    public function testCreateRejectsUnknownRoleValueByFallingBackToUser(): void
+    {
+        $login = 'test_create_badrole_' . uniqid();
+        $id = $this->users->create('New', 'Person', $login, 'plaintext123', 'SuperAdmin');
+
+        $row = $this->users->findById($id);
+
+        $this->assertSame('User', $row['Role']);
+    }
+
     public function testFindByLoginReturnsNullWhenMissing(): void
     {
         $this->assertNull($this->users->findByLogin('does_not_exist_' . uniqid()));

@@ -15,7 +15,16 @@ final class ContactsController
 
     public function search(AuthContext $auth, Request $request): array
     {
-        $results = $this->contacts->search($auth->id, $request->input('query'));
+        $favoritesOnlyRaw = $request->input('favoritesOnly');
+        $favoritesOnly = $favoritesOnlyRaw === '1' || $favoritesOnlyRaw === true;
+
+        $results = $this->contacts->search(
+            $auth->id,
+            $request->input('query'),
+            $request->input('sortBy'),
+            $request->input('sortDir', 'ASC'),
+            $favoritesOnly
+        );
 
         return Response::success($results);
     }
@@ -88,6 +97,13 @@ final class ContactsController
 
         if ($required && count($data) < count($fields)) {
             return null;
+        }
+
+        if (!$required) {
+            $isFavorite = $request->input('Is_Favorite');
+            if ($isFavorite !== null) {
+                $data['Is_Favorite'] = $isFavorite ? 1 : 0;
+            }
         }
 
         return $data;
