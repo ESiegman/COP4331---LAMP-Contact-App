@@ -87,4 +87,72 @@ final class AdminControllerTest extends DatabaseTestCase
 
         $this->assertSame(403, $result['status']);
     }
+
+    public function testNonAdminCannotCreateUser(): void
+    {
+        $result = $this->controller->createUser($this->regularUser, new Request('POST', 'admin.users.create', [
+            'First_Name' => 'New', 'Last_Name' => 'Person', 'Login' => 'newperson_' . uniqid(), 'Password' => 'pw12345',
+        ]));
+
+        $this->assertSame(403, $result['status']);
+    }
+
+    public function testAdminCanCreateUserDefaultingToUserRole(): void
+    {
+        $login = 'admin_created_' . uniqid();
+
+        $result = $this->controller->createUser($this->admin, new Request('POST', 'admin.users.create', [
+            'First_Name' => 'New', 'Last_Name' => 'Person', 'Login' => $login, 'Password' => 'pw12345',
+        ]));
+
+        $this->assertSame(201, $result['status']);
+        $this->assertSame('User', $result['body']['data']['role']);
+
+        $row = $this->users->findByLogin($login);
+        $this->assertSame('User', $row['Role']);
+        $this->assertTrue(password_verify('pw12345', $row['Password']));
+    }
+
+    public function testAdminCanCreateUserWithAdminRole(): void
+    {
+        $login = 'admin_created_admin_' . uniqid();
+
+        $result = $this->controller->createUser($this->admin, new Request('POST', 'admin.users.create', [
+            'First_Name' => 'New', 'Last_Name' => 'Admin', 'Login' => $login, 'Password' => 'pw12345', 'Role' => 'Admin',
+        ]));
+
+        $this->assertSame(201, $result['status']);
+        $row = $this->users->findByLogin($login);
+        $this->assertSame('Admin', $row['Role']);
+    }
+
+    public function testCreateUserRejectsMissingFields(): void
+    {
+        $result = $this->controller->createUser($this->admin, new Request('POST', 'admin.users.create', [
+            'Login' => 'onlylogin_' . uniqid(),
+        ]));
+
+        $this->assertSame(400, $result['status']);
+    }
+
+    public function testCreateUserRejectsInvalidRole(): void
+    {
+        $result = $this->controller->createUser($this->admin, new Request('POST', 'admin.users.create', [
+            'First_Name' => 'New', 'Last_Name' => 'Person', 'Login' => 'badrole_' . uniqid(),
+            'Password' => 'pw12345', 'Role' => 'SuperAdmin',
+        ]));
+
+        $this->assertSame(400, $result['status']);
+    }
+
+    public function testCreateUserRejectsDuplicateLogin(): void
+    {
+        $login = 'dup_admin_created_' . uniqid();
+        $body = ['First_Name' => 'New', 'Last_Name' => 'Person', 'Login' => $login, 'Password' => 'pw12345'];
+
+        $this->controller->createUser($this->admin, new Request('POST', 'admin.users.create', $body));
+        $result = $this->controller->createUser($this->admin, new Request('POST', 'admin.users.create', $body));
+
+        $this->assertSame(409, $result['status']);
+    }
 }

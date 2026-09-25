@@ -104,4 +104,77 @@ final class ContactModelTest extends DatabaseTestCase
         $this->assertNotEmpty($results);
         $this->assertSame('Unique', $results[0]['First_Name']);
     }
+
+    public function testCreateDefaultsIsFavoriteToFalse(): void
+    {
+        $id = $this->contacts->create($this->ownerId, [
+            'First_Name' => 'Plain',
+            'Last_Name' => 'Contact',
+            'Email' => 'plain@example.com',
+            'Phone_Number' => '555-5555',
+        ]);
+
+        $row = $this->contacts->findById($id);
+
+        $this->assertSame(0, (int) $row['Is_Favorite']);
+    }
+
+    public function testUpdateCanToggleIsFavorite(): void
+    {
+        $id = $this->contacts->create($this->ownerId, [
+            'First_Name' => 'Fav',
+            'Last_Name' => 'Contact',
+            'Email' => 'fav@example.com',
+            'Phone_Number' => '555-6666',
+        ]);
+
+        $this->contacts->update($id, ['Is_Favorite' => 1]);
+
+        $row = $this->contacts->findById($id);
+        $this->assertSame(1, (int) $row['Is_Favorite']);
+    }
+
+    public function testSearchFavoritesOnlyFilter(): void
+    {
+        $favId = $this->contacts->create($this->ownerId, [
+            'First_Name' => 'Favorited', 'Last_Name' => 'One', 'Email' => 'f1@example.com', 'Phone_Number' => '555-7001',
+        ]);
+        $this->contacts->create($this->ownerId, [
+            'First_Name' => 'NotFavorited', 'Last_Name' => 'Two', 'Email' => 'f2@example.com', 'Phone_Number' => '555-7002',
+        ]);
+        $this->contacts->update($favId, ['Is_Favorite' => 1]);
+
+        $results = $this->contacts->search($this->ownerId, null, null, 'ASC', true);
+        $names = array_column($results, 'First_Name');
+
+        $this->assertContains('Favorited', $names);
+        $this->assertNotContains('NotFavorited', $names);
+    }
+
+    public function testSearchSortsByExplicitColumnAndDirection(): void
+    {
+        $this->contacts->create($this->ownerId, [
+            'First_Name' => 'Aaron', 'Last_Name' => 'Z', 'Email' => 'a@example.com', 'Phone_Number' => '555-8001',
+        ]);
+        $this->contacts->create($this->ownerId, [
+            'First_Name' => 'Zack', 'Last_Name' => 'A', 'Email' => 'z@example.com', 'Phone_Number' => '555-8002',
+        ]);
+
+        $ascending = $this->contacts->search($this->ownerId, null, 'First_Name', 'ASC');
+        $descending = $this->contacts->search($this->ownerId, null, 'First_Name', 'DESC');
+
+        $this->assertSame('Aaron', $ascending[0]['First_Name']);
+        $this->assertSame('Zack', $descending[0]['First_Name']);
+    }
+
+    public function testSearchIgnoresInvalidSortColumn(): void
+    {
+        $this->contacts->create($this->ownerId, [
+            'First_Name' => 'Safe', 'Last_Name' => 'Contact', 'Email' => 's@example.com', 'Phone_Number' => '555-9001',
+        ]);
+
+        $results = $this->contacts->search($this->ownerId, null, 'ID; DROP TABLE Contacts;--', 'ASC');
+
+        $this->assertNotEmpty($results);
+    }
 }

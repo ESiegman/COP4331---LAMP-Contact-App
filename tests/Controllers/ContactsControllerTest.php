@@ -70,6 +70,50 @@ final class ContactsControllerTest extends DatabaseTestCase
         $this->assertNotContains('Secret', $names);
     }
 
+    public function testSearchRespectsFavoritesOnlyFlag(): void
+    {
+        $created = $this->create($this->owner, ['First_Name' => 'Favorited']);
+        $id = $created['body']['data']['id'];
+        $this->create($this->owner, ['First_Name' => 'Plain']);
+
+        $this->controller->update($this->owner, new Request('PUT', 'contacts.update', [
+            'id' => $id, 'Is_Favorite' => true,
+        ]));
+
+        $result = $this->controller->search($this->owner, new Request('GET', 'contacts.search', [], ['favoritesOnly' => '1']));
+        $names = array_column($result['body']['data'], 'First_Name');
+
+        $this->assertContains('Favorited', $names);
+        $this->assertNotContains('Plain', $names);
+    }
+
+    public function testSearchRespectsSortByParam(): void
+    {
+        $this->create($this->owner, ['First_Name' => 'Aaron']);
+        $this->create($this->owner, ['First_Name' => 'Zack']);
+
+        $result = $this->controller->search($this->owner, new Request('GET', 'contacts.search', [], [
+            'sortBy' => 'First_Name', 'sortDir' => 'DESC',
+        ]));
+
+        $this->assertSame('Zack', $result['body']['data'][0]['First_Name']);
+    }
+
+    public function testUpdateCanSetIsFavorite(): void
+    {
+        $created = $this->create($this->owner);
+        $id = $created['body']['data']['id'];
+
+        $result = $this->controller->update($this->owner, new Request('PUT', 'contacts.update', [
+            'id' => $id, 'Is_Favorite' => true,
+        ]));
+
+        $this->assertSame(200, $result['status']);
+
+        $fetched = $this->controller->get($this->owner, new Request('GET', 'contacts.get', ['id' => $id]));
+        $this->assertSame(1, (int) $fetched['body']['data']['Is_Favorite']);
+    }
+
     public function testGetReturnsOwnContact(): void
     {
         $created = $this->create($this->owner, ['First_Name' => 'Gettable']);
