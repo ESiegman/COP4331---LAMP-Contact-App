@@ -323,3 +323,54 @@ select.form-control {
 .modal-content.glass-card .modal-footer {
     border-color: rgba(255, 255, 255, 0.08) !important;
 }
+
+/* Sortable table headers */
+.table-dark-custom thead th button.sortable-header {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.table-dark-custom thead th button.sortable-header:hover,
+.table-dark-custom thead th button.sortable-header.active-sort {
+    color: var(--text-primary);
+}
+
+.table-dark-custom thead th button.sortable-header .sort-icon {
+    font-size: 0.7rem;
+    opacity: 0.5;
+}
+
+.table-dark-custom thead th button.sortable-header.active-sort .sort-icon {
+    opacity: 1;
+}
+
+/* Favorite star toggle (table rows + sortable header) */
+.favorite-star {
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.favorite-star:hover {
+    color: #fbbf24;
+    transform: scale(1.1);
+}
+
+.favorite-star.active {
+    color: #fbbf24; /* amber, ~7:1 contrast on card background */
+}

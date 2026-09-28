@@ -49,11 +49,16 @@
                     <div class="card-body p-0">
 
                         <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-3 mb-4">
-                            <div class="input-group" style="max-width: 420px;">
-                                <span class="input-group-text"><i class="bi bi-search text-secondary-contrast"></i></span>
-                                <input type="text" id="searchInput" class="form-control" placeholder="Search by name, email, or phone" autocomplete="off" />
+                            <div class="d-flex flex-column flex-sm-row gap-2">
+                                <div class="input-group" style="max-width: 420px;">
+                                    <span class="input-group-text"><i class="bi bi-search text-secondary-contrast"></i></span>
+                                    <input type="text" id="searchInput" class="form-control" placeholder="Search by name, email, or phone" autocomplete="off" />
+                                </div>
+                                <button type="button" id="favoritesOnlyToggle" class="btn btn-outline-light btn-sm text-nowrap" aria-pressed="false" title="Show only favorites">
+                                    <i class="bi bi-star me-1"></i> Favorites only
+                                </button>
                             </div>
-                            <button type="button" id="addContactButton" class="btn btn-success fw-semibold" data-bs-toggle="modal" data-bs-target="#contactModal">
+                            <button type="button" id="addContactButton" class="btn btn-success fw-semibold text-nowrap" data-bs-toggle="modal" data-bs-target="#contactModal">
                                 <i class="bi bi-plus-lg me-1"></i> Add Contact
                             </button>
                         </div>
@@ -62,9 +67,26 @@
                             <table class="table table-dark-custom align-middle mb-0">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Phone</th>
+                                        <th style="width: 40px;" class="text-center">
+                                            <button type="button" class="sortable-header" data-sort="Is_Favorite" aria-label="Sort by favorite" title="Sort by favorite (click again to reverse, a third time to clear)">
+                                                <i class="bi bi-star"></i>
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <button type="button" class="sortable-header" data-sort="Last_Name" title="Sort by name (click again to reverse, a third time to clear)">
+                                                Name <i class="bi bi-arrow-down-up sort-icon"></i>
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <button type="button" class="sortable-header" data-sort="Email" title="Sort by email (click again to reverse, a third time to clear)">
+                                                Email <i class="bi bi-arrow-down-up sort-icon"></i>
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <button type="button" class="sortable-header" data-sort="Phone_Number" title="Sort by phone (click again to reverse, a third time to clear)">
+                                                Phone <i class="bi bi-arrow-down-up sort-icon"></i>
+                                            </button>
+                                        </th>
                                         <th class="text-end">Actions</th>
                                     </tr>
                                 </thead>
@@ -74,7 +96,7 @@
 
                         <div id="emptyState" class="text-center text-secondary-contrast py-5 d-none">
                             <i class="bi bi-person-x display-6 d-block mb-2"></i>
-                            No contacts found. Try a different search, or add a new one.
+                            <span id="emptyStateText">No contacts found. Try a different search, or add a new one.</span>
                         </div>
 
                     </div>
@@ -109,9 +131,15 @@
                             <label class="form-label form-label-contrast small">Email</label>
                             <input type="email" id="contactEmail" class="form-control" required />
                         </div>
-                        <div class="mb-2">
+                        <div class="mb-3">
                             <label class="form-label form-label-contrast small">Phone Number</label>
                             <input type="tel" id="contactPhone" class="form-control" required />
+                        </div>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="contactIsFavorite" />
+                            <label class="form-check-label form-label-contrast small" for="contactIsFavorite">
+                                <i class="bi bi-star-fill me-1"></i> Favorite
+                            </label>
                         </div>
                         <div id="contactFormResult" class="small fw-semibold"></div>
                     </div>
