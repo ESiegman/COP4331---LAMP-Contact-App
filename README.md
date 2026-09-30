@@ -87,3 +87,11 @@ Squash and merge, then delete the branch.
 
 - `.github/workflows/php-tests.yml`: runs on every PR
 - `.github/workflows/deploy.yml`: runs on every push to `main`. Deploys to droplet.
+
+## AI disclosure
+
+This project used generative AI (Claude, by Anthropic) for the following:
+
+- Wrote the API tests
+- Helped build the frontend JavaScript, HTML, and CSS
+- Generated 25 rows of test data
