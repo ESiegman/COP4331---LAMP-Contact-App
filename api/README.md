@@ -180,8 +180,10 @@ All require an active session and `Role: "Admin"` (`403` otherwise). Disabled ad
 | Param | Required |
 |---|---|
 | `query` | no, omit to list every user |
+| `sortBy` | no, one of `First_Name`, `Last_Name`, `Login`, `Role`, `Active`. Invalid/omitted falls back to `Login` |
+| `sortDir` | no, `ASC` or `DESC`, defaults to `ASC` |
 
-Matches `Login`, `First_Name`, `Last_Name`. No password hash in the response.
+Matches `Login`, `First_Name`, `Last_Name`. No password hash in the response. Sorting `Role` ascending lists Admins first; sorting `Active` descending lists active accounts first.
 
 Responses:
 - `200` success, `data` is an array of user rows
@@ -219,6 +221,18 @@ Responses:
 | `id` | yes |
 
 Sets `Active` to false. Works on any user, including other Admins. Never deletes anything.
+
+Responses:
+- `200` success
+- `404` user doesn't exist
+
+### PUT `admin.users.enable`
+
+| Field | Required |
+|---|---|
+| `id` | yes |
+
+Sets `Active` back to true.
 
 Responses:
 - `200` success

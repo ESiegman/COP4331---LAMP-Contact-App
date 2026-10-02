@@ -96,4 +96,58 @@ final class UserModelTest extends DatabaseTestCase
         $this->assertTrue(password_verify('newpassword', $row['Password']));
         $this->assertFalse(password_verify('oldpassword', $row['Password']));
     }
+
+    public function testSearchSortsByExplicitColumnAndDirection(): void
+    {
+        $token = 'sortname' . uniqid();
+        $this->users->create('Aaron', $token, 'sort_a_' . uniqid(), 'pw12345');
+        $this->users->create('Zack', $token, 'sort_z_' . uniqid(), 'pw12345');
+
+        $ascending = $this->users->search($token, 'First_Name', 'ASC');
+        $descending = $this->users->search($token, 'First_Name', 'DESC');
+
+        $this->assertSame('Aaron', $ascending[0]['First_Name']);
+        $this->assertSame('Zack', $descending[0]['First_Name']);
+    }
+
+    public function testSearchCanSortByRole(): void
+    {
+        $token = 'sortrole' . uniqid();
+        $this->users->create('Plain', $token, 'sort_user_' . uniqid(), 'pw12345');
+        $this->users->create('Boss', $token, 'sort_admin_' . uniqid(), 'pw12345', 'Admin');
+
+        $adminsFirst = $this->users->search($token, 'Role', 'ASC');
+
+        $this->assertSame('Admin', $adminsFirst[0]['Role']);
+    }
+
+    public function testSearchCanSortByActiveStatus(): void
+    {
+        $token = 'sortactive' . uniqid();
+        $this->users->create('On', $token, 'sort_on_' . uniqid(), 'pw12345');
+        $offId = $this->users->create('Off', $token, 'sort_off_' . uniqid(), 'pw12345');
+        $this->users->disable($offId);
+
+        $activeFirst = $this->users->search($token, 'Active', 'DESC');
+
+        $this->assertSame(1, (int) $activeFirst[0]['Active']);
+        $this->assertSame(0, (int) $activeFirst[1]['Active']);
+    }
+
+    public function testSearchIgnoresInvalidSortColumn(): void
+    {
+        $login = 'sortsafe_' . uniqid();
+        $this->users->create('Safe', 'User', $login, 'pw12345');
+
+        $results = $this->users->search($login, 'Password; DROP TABLE Users;--', 'ASC');
+
+        $this->assertNotEmpty($results);
+    }
+
+    public function testSearchNeverExposesPasswordHash(): void
+    {
+        $results = $this->users->search(null, 'Login', 'ASC');
+
+        $this->assertArrayNotHasKey('Password', $results[0]);
+    }
 }

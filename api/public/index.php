@@ -89,6 +89,7 @@ $router->add('GET', 'admin.users.search', $requireAuth(fn ($auth, $r) => $adminC
 $router->add('POST', 'admin.users.create', $requireAuth(fn ($auth, $r) => $adminController->createUser($auth, $r)));
 $router->add('GET', 'admin.users.contacts', $requireAuth(fn ($auth, $r) => $adminController->userContacts($auth, $r)));
 $router->add('PUT', 'admin.users.disable', $requireAuth(fn ($auth, $r) => $adminController->disableUser($auth, $r)));
+$router->add('PUT', 'admin.users.enable', $requireAuth(fn ($auth, $r) => $adminController->enableUser($auth, $r)));
 $router->add('PUT', 'admin.users.password', $requireAuth(fn ($auth, $r) => $adminController->changeUserPassword($auth, $r)));
 
 $method = $_SERVER['REQUEST_METHOD'];
