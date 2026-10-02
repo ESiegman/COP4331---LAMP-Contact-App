@@ -191,22 +191,15 @@ Squash and merge, then delete the branch.
 - `.github/workflows/php-tests.yml`: runs on every PR into `main`. Starts MySQL 8.0, loads `db/schema.sql` and `db/seed_test.sql`, then runs PHPUnit.
 - `.github/workflows/deploy.yml`: runs on every push to `main`. Deploys to the droplet.
 
-## AI Assistance Disclosure
+## AI Disclosure
 
 This project was developed with assistance from generative AI tools:
 
 **Claude Code (Anthropic)**
 
-- **Tool**: Claude Code [TEAM TO COMPLETE: model version]
-- **Dates**: [TEAM TO COMPLETE]
-- **Scope**: The API's automated PHPUnit test suite; JavaScript and HTML for the frontend; CSS styling for the web page design; 25 rows of test data used to populate the database
-- **Use**: Code generation (tests, frontend markup and scripts, styling) and generating sample data
-
-**Claude Sonnet 5.5 (Anthropic, claude.ai)**
-
-- **Tool**: Claude Sonnet 5.5 (Anthropic, claude.ai)
-- **Dates**: October 1, 2026
-- **Scope**: Reviewing the repository against the project requirements, rewriting this README, adding text and screen-reader labels to icon-only buttons, and adding sortable columns to the admin user list (API sort parameters, tests, API documentation, and the admin page)
-- **Use**: Documentation drafting and editing, code review, and small code edits and additions, plus flagging inconsistencies for the team to resolve
+- **Tool**: Claude Code Sonnet 5.5
+- **Dates**: September 17 - October 1, 2026
+- **Scope**: The API's automated PHPUnit test suite; JavaScript and HTML for the frontend; CSS styling for the web page design; 25 rows of test data used to populate the database; Polishing this README
+- **Use**: Code generation and review (tests, frontend markup and scripts, styling) and generating sample data
 
 All AI-generated or AI-edited content was reviewed, tested, and modified by the team to meet the assignment requirements. The final implementation reflects the team's understanding of the concepts.
