@@ -3,11 +3,24 @@
 let adminUser = null;
 let usersById = new Map();
 let pendingDisableId = null;
+let pendingEnableId = null;
 let pendingPasswordUserId = null;
 let activeContactsUserId = null;
 
+let sortBy = null; // null = server default (Login)
+let sortDir = "ASC";
+
+// Direction used on the first click of each column.
+const DEFAULT_SORT_DIR = {
+  Last_Name: "ASC",
+  Login: "ASC",
+  Role: "ASC", // admins first
+  Active: "DESC", // active accounts first
+};
+
 const createUserModal = () => bootstrap.Modal.getOrCreateInstance(document.getElementById("createUserModal"));
 const disableModal = () => bootstrap.Modal.getOrCreateInstance(document.getElementById("disableModal"));
+const enableModal = () => bootstrap.Modal.getOrCreateInstance(document.getElementById("enableModal"));
 const resetPasswordModal = () => bootstrap.Modal.getOrCreateInstance(document.getElementById("resetPasswordModal"));
 const userContactsModal = () => bootstrap.Modal.getOrCreateInstance(document.getElementById("userContactsModal"));
 
@@ -22,9 +35,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("userSearchInput").addEventListener("input", debounce(loadUsers, 300));
   document.getElementById("createUserForm").addEventListener("submit", createUser);
   document.getElementById("confirmDisableButton").addEventListener("click", confirmDisable);
+  document.getElementById("confirmEnableButton").addEventListener("click", confirmEnable);
   document.getElementById("resetPasswordForm").addEventListener("submit", submitResetPassword);
   document.getElementById("userContactsSearch").addEventListener("input", debounce(loadUserContacts, 300));
   document.getElementById("usersTableBody").addEventListener("click", handleUsersTableClick);
+
+  document.querySelectorAll(".sortable-header").forEach((btn) => {
+    btn.addEventListener("click", () => handleSortClick(btn.dataset.sort));
+  });
 
   document.getElementById("createUserModal").addEventListener("hidden.bs.modal", () => {
     document.getElementById("createUserForm").reset();
@@ -37,6 +55,47 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   loadUsers();
 });
+
+function handleSortClick(column) {
+  const defaultDir = DEFAULT_SORT_DIR[column] || "ASC";
+  const flippedDir = defaultDir === "ASC" ? "DESC" : "ASC";
+
+  if (sortBy !== column) {
+    // First click: sort by this column in its default direction.
+    sortBy = column;
+    sortDir = defaultDir;
+  } else if (sortDir === defaultDir) {
+    // Second click: flip direction.
+    sortDir = flippedDir;
+  } else {
+    // Third click: clear back to the server's default sort.
+    sortBy = null;
+    sortDir = "ASC";
+  }
+
+  updateSortIndicators();
+  loadUsers();
+}
+
+function updateSortIndicators() {
+  document.querySelectorAll(".sortable-header").forEach((btn) => {
+    const isActive = btn.dataset.sort === sortBy;
+    const icon = btn.querySelector(".sort-icon");
+
+    btn.classList.toggle("active-sort", isActive);
+    btn.closest("th").setAttribute(
+      "aria-sort",
+      !isActive ? "none" : sortDir === "ASC" ? "ascending" : "descending"
+    );
+
+    if (!icon) return;
+    if (!isActive) {
+      icon.className = "bi bi-arrow-down-up sort-icon";
+    } else {
+      icon.className = sortDir === "ASC" ? "bi bi-sort-up sort-icon" : "bi bi-sort-down sort-icon";
+    }
+  });
+}
 
 function handleUsersTableClick(event) {
   const btn = event.target.closest("button[data-action]");
@@ -52,6 +111,8 @@ function handleUsersTableClick(event) {
     openResetPassword(user.ID, name);
   } else if (btn.dataset.action === "disable") {
     openDisableUser(user.ID, name);
+  } else if (btn.dataset.action === "enable") {
+    openEnableUser(user.ID, name);
   }
 }
 
@@ -61,7 +122,12 @@ async function loadUsers() {
   const emptyState = document.getElementById("usersEmptyState");
 
   try {
-    const users = await apiCall("admin.users.search", "GET", { query });
+    const params = { query };
+    if (sortBy) {
+      params.sortBy = sortBy;
+      params.sortDir = sortDir;
+    }
+    const users = await apiCall("admin.users.search", "GET", params);
     usersById = new Map(users.map((u) => [Number(u.ID), u]));
     renderUsers(users);
     emptyState.classList.toggle("d-none", users.length > 0);
@@ -83,6 +149,13 @@ function renderUsers(users) {
       const statusBadge = active
         ? `<span class="badge status-badge-active">Active</span>`
         : `<span class="badge status-badge-disabled">Disabled</span>`;
+      const statusButton = active
+        ? `<button type="button" class="btn btn-sm btn-outline-danger" data-action="disable" data-id="${u.ID}" title="Disable account">
+             <i class="bi bi-slash-circle me-1"></i> Disable
+           </button>`
+        : `<button type="button" class="btn btn-sm btn-outline-success" data-action="enable" data-id="${u.ID}" title="Re-enable account">
+             <i class="bi bi-check-circle me-1"></i> Enable
+           </button>`;
 
       return `
         <tr>
@@ -92,14 +165,12 @@ function renderUsers(users) {
           <td>${statusBadge}</td>
           <td class="text-end text-nowrap">
             <button type="button" class="btn btn-sm btn-outline-light me-1" data-action="view-contacts" data-id="${u.ID}" title="View contacts">
-              <i class="bi bi-eye"></i>
+              <i class="bi bi-eye me-1"></i> Contacts
             </button>
             <button type="button" class="btn btn-sm btn-outline-light me-1" data-action="reset-password" data-id="${u.ID}" title="Reset password">
-              <i class="bi bi-key"></i>
+              <i class="bi bi-key me-1"></i> Reset password
             </button>
-            <button type="button" class="btn btn-sm btn-outline-danger" data-action="disable" data-id="${u.ID}" ${active ? "" : "disabled"} title="Disable account">
-              <i class="bi bi-slash-circle"></i>
-            </button>
+            ${statusButton}
           </td>
         </tr>
       `;
@@ -149,6 +220,29 @@ async function confirmDisable() {
   } finally {
     button.disabled = false;
     pendingDisableId = null;
+  }
+}
+
+function openEnableUser(id, name) {
+  pendingEnableId = id;
+  document.getElementById("enableUserName").textContent = name;
+  enableModal().show();
+}
+
+async function confirmEnable() {
+  if (!pendingEnableId) return;
+  const button = document.getElementById("confirmEnableButton");
+  button.disabled = true;
+
+  try {
+    await apiCall("admin.users.enable", "PUT", { id: pendingEnableId });
+    enableModal().hide();
+    loadUsers();
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    button.disabled = false;
+    pendingEnableId = null;
   }
 }
 

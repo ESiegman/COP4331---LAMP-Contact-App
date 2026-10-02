@@ -22,7 +22,11 @@ final class AdminController
             return Response::error('Forbidden', 403);
         }
 
-        return Response::success($this->users->search($request->input('query')));
+        return Response::success($this->users->search(
+            $request->input('query'),
+            $request->input('sortBy'),
+            $request->input('sortDir', 'ASC')
+        ));
     }
 
     public function userContacts(AuthContext $auth, Request $request): array
@@ -82,6 +86,23 @@ final class AdminController
         }
 
         $this->users->disable($id);
+
+        return Response::success([]);
+    }
+
+    public function enableUser(AuthContext $auth, Request $request): array
+    {
+        if (!$auth->isAdmin()) {
+            return Response::error('Forbidden', 403);
+        }
+
+        $id = (int) $request->input('id');
+
+        if ($this->users->findById($id) === null) {
+            return Response::error('User not found', 404);
+        }
+
+        $this->users->enable($id);
 
         return Response::success([]);
     }

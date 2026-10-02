@@ -374,3 +374,16 @@ select.form-control {
 .favorite-star.active {
     color: #fbbf24; /* amber, ~7:1 contrast on card background */
 }
+
+/* Re-enable account button (admin panel): themed so it stays readable on dark cards */
+.btn-outline-success {
+    color: var(--color-success) !important;
+    border-color: var(--color-success) !important;
+    background: transparent;
+}
+
+.btn-outline-success:hover {
+    color: #ffffff !important;
+    background-color: #047857 !important;
+    border-color: #047857 !important;
+}

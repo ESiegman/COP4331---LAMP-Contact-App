@@ -6,6 +6,8 @@ use PDO;
 
 final class UserModel
 {
+    private const SORTABLE_COLUMNS = ['First_Name', 'Last_Name', 'Login', 'Role', 'Active'];
+
     public function __construct(private PDO $pdo)
     {
     }
@@ -49,29 +51,50 @@ final class UserModel
         return $row ?: null;
     }
 
-    public function search(?string $query): array
+    public function search(?string $query, ?string $sortBy = null, string $sortDir = 'ASC'): array
     {
-        if ($query === null || $query === '') {
-            $stmt = $this->pdo->query(
-                'SELECT ID, First_Name, Last_Name, Login, Role, Active FROM Users ORDER BY Login'
-            );
+        $sql = 'SELECT ID, First_Name, Last_Name, Login, Role, Active FROM Users';
+        $params = [];
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($query !== null && $query !== '') {
+            $sql .= ' WHERE Login LIKE :q OR First_Name LIKE :q OR Last_Name LIKE :q';
+            $params['q'] = '%' . $query . '%';
         }
 
-        $stmt = $this->pdo->prepare(
-            'SELECT ID, First_Name, Last_Name, Login, Role, Active FROM Users
-             WHERE Login LIKE :q OR First_Name LIKE :q OR Last_Name LIKE :q
-             ORDER BY Login'
-        );
-        $stmt->execute(['q' => '%' . $query . '%']);
+        $sql .= ' ORDER BY ' . $this->orderBy($sortBy, $sortDir);
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function orderBy(?string $sortBy, string $sortDir): string
+    {
+        if ($sortBy === null || !in_array($sortBy, self::SORTABLE_COLUMNS, true)) {
+            return 'Login';
+        }
+
+        $direction = strtoupper($sortDir) === 'DESC' ? 'DESC' : 'ASC';
+
+        // Secondary keys keep ties in a stable, readable order.
+        if ($sortBy === 'Last_Name') {
+            return "Last_Name $direction, First_Name $direction, Login ASC";
+        }
+
+        return "$sortBy $direction, Login ASC";
     }
 
     public function disable(int $id): bool
     {
         $stmt = $this->pdo->prepare('UPDATE Users SET Active = 0 WHERE ID = :id');
+
+        return $stmt->execute(['id' => $id]);
+    }
+
+    public function enable(int $id): bool
+    {
+        $stmt = $this->pdo->prepare('UPDATE Users SET Active = 1 WHERE ID = :id');
 
         return $stmt->execute(['id' => $id]);
     }

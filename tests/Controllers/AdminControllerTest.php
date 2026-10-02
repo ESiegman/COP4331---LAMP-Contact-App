@@ -69,6 +69,38 @@ final class AdminControllerTest extends DatabaseTestCase
         $this->assertSame(0, (int) $this->users->findById($otherAdminId)['Active']);
     }
 
+    public function testNonAdminCannotEnableUser(): void
+    {
+        $this->users->disable($this->regularUser->id);
+
+        $result = $this->controller->enableUser($this->regularUser, new Request('PUT', 'admin.users.enable', [
+            'id' => $this->regularUser->id,
+        ]));
+
+        $this->assertSame(403, $result['status']);
+    }
+
+    public function testAdminCanReEnableADisabledUser(): void
+    {
+        $this->users->disable($this->regularUser->id);
+
+        $result = $this->controller->enableUser($this->admin, new Request('PUT', 'admin.users.enable', [
+            'id' => $this->regularUser->id,
+        ]));
+
+        $this->assertSame(200, $result['status']);
+        $this->assertSame(1, (int) $this->users->findById($this->regularUser->id)['Active']);
+    }
+
+    public function testEnableUserReturns404ForUnknownId(): void
+    {
+        $result = $this->controller->enableUser($this->admin, new Request('PUT', 'admin.users.enable', [
+            'id' => 999999,
+        ]));
+
+        $this->assertSame(404, $result['status']);
+    }
+
     public function testAdminCanChangeUserPasswordAndUserCanLoginWithNewOne(): void
     {
         $result = $this->controller->changeUserPassword($this->admin, new Request('PUT', 'admin.users.password', [
@@ -154,5 +186,19 @@ final class AdminControllerTest extends DatabaseTestCase
         $result = $this->controller->createUser($this->admin, new Request('POST', 'admin.users.create', $body));
 
         $this->assertSame(409, $result['status']);
+    }
+
+    public function testAdminCanSortUsers(): void
+    {
+        $token = 'ctrlsort' . uniqid();
+        $this->users->create('Aaron', $token, 'ctrl_sort_a_' . uniqid(), 'pw12345');
+        $this->users->create('Zack', $token, 'ctrl_sort_z_' . uniqid(), 'pw12345');
+
+        $result = $this->controller->listUsers($this->admin, new Request('GET', 'admin.users.search', [], [
+            'query' => $token, 'sortBy' => 'First_Name', 'sortDir' => 'DESC',
+        ]));
+
+        $this->assertSame(200, $result['status']);
+        $this->assertSame('Zack', $result['body']['data'][0]['First_Name']);
     }
 }

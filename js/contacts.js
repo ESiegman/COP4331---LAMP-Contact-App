@@ -167,8 +167,9 @@ function buildContactRow(c) {
   return `
     <tr>
       <td class="text-center">
-        <button type="button" class="favorite-star ${isFavorite ? "active" : ""}" data-action="favorite" data-id="${c.ID}" title="${isFavorite ? "Remove from favorites" : "Add to favorites"}">
-          <i class="bi ${isFavorite ? "bi-star-fill" : "bi-star"}"></i>
+        <button type="button" class="favorite-star ${isFavorite ? "active" : ""}" data-action="favorite" data-id="${c.ID}" aria-pressed="${isFavorite}" title="${isFavorite ? "Remove from favorites" : "Add to favorites"}">
+          <i class="bi ${isFavorite ? "bi-star-fill" : "bi-star"}" aria-hidden="true"></i>
+          <span class="visually-hidden">${isFavorite ? "Remove from favorites" : "Add to favorites"}</span>
         </button>
       </td>
       <td>
@@ -180,11 +181,11 @@ function buildContactRow(c) {
       <td class="text-secondary-contrast">${escapeHtml(c.Email)}</td>
       <td class="text-secondary-contrast">${escapeHtml(c.Phone_Number)}</td>
       <td class="text-end">
-        <button type="button" class="btn btn-sm btn-outline-light me-1" data-action="edit" data-id="${c.ID}" title="Edit">
-          <i class="bi bi-pencil"></i>
+        <button type="button" class="btn btn-sm btn-outline-light me-1" data-action="edit" data-id="${c.ID}" title="Edit contact">
+          <i class="bi bi-pencil me-1"></i> Edit
         </button>
-        <button type="button" class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${c.ID}" title="Delete">
-          <i class="bi bi-trash3"></i>
+        <button type="button" class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${c.ID}" title="Delete contact">
+          <i class="bi bi-trash3 me-1"></i> Delete
         </button>
       </td>
     </tr>
